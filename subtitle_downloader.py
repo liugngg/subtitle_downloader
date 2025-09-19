@@ -29,7 +29,7 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
         self.SetStatusText("准备就绪")
         self.SetStatusText("窗口未置顶", 1)
 
-        self.dir_input.SetValue(r"A:\dowing")
+        self.dir_input.SetValue(r"A:\downing")
         self.reset_button.Disable()
 
         # 内部数据存储
@@ -123,7 +123,7 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
 
         if new_folder:
             try:
-                name_folder_path = os.path.join(save_dir, name)
+                name_folder_path = os.path.join(save_dir, new_folder)
                 os.makedirs(name_folder_path, exist_ok=True)
                 self.dir_input.SetValue(name_folder_path)
                 self.status_bar.SetStatusText(f"已创建新文件夹为：{new_folder}")
