@@ -59,8 +59,11 @@ mainFrame::mainFrame( wxWindow* parent, wxWindowID id, const wxString& title, co
 	h1_sizer->Add( is_4k, 0, wxALL, 5 );
 
 	is_crack = new wxCheckBox( sbSizer1->GetStaticBox(), wxID_ANY, _("破解"), wxDefaultPosition, wxDefaultSize, 0 );
-	is_crack->SetValue(true);
 	h1_sizer->Add( is_crack, 0, wxALL, 5 );
+
+	is_lada = new wxCheckBox( sbSizer1->GetStaticBox(), wxID_ANY, _("LADA"), wxDefaultPosition, wxDefaultSize, 0 );
+	is_lada->SetValue(true);
+	h1_sizer->Add( is_lada, 0, wxALL, 5 );
 
 	is_enhance = new wxCheckBox( sbSizer1->GetStaticBox(), wxID_ANY, _("增强"), wxDefaultPosition, wxDefaultSize, 0 );
 	h1_sizer->Add( is_enhance, 0, wxALL, 5 );

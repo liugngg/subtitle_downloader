@@ -111,7 +111,9 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
             extend = ''
             if self.is_4k.IsChecked():
                 extend = '4K'
-            if self.is_crack.IsChecked():
+            if self.is_lada.IsChecked():
+                extend += 'La'
+            elif self.is_crack.IsChecked():
                 extend += 'U'
             if self.is_leaked.IsChecked():
                 extend += 'L'

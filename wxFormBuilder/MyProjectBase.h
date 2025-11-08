@@ -48,6 +48,7 @@ class mainFrame : public wxFrame
 		wxCheckBox* is_av;
 		wxCheckBox* is_4k;
 		wxCheckBox* is_crack;
+		wxCheckBox* is_lada;
 		wxCheckBox* is_enhance;
 		wxCheckBox* is_leaked;
 		wxCheckBox* is_cn;
