@@ -7,10 +7,9 @@ import threading
 import subprocess
 from urllib.parse import quote
 import my_mainform
-
+import win32com.client
 # 使用 wx.CallAfter 来安全地从后台线程更新主GUI线程
 from wx.lib.pubsub import pub
-
 
 class SubtitleDownloaderFrame(my_mainform.mainFrame):
     def __init__(self):
@@ -40,6 +39,7 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
         pub.subscribe(self.update_status, "update_status")
         pub.subscribe(self.update_list, "update_list")
         # pub.subscribe(self.show_message_dialog, "show_message")
+
 
     def update_status(self, message):
         """线程安全地更新状态栏"""
@@ -153,14 +153,39 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
             self.SetWindowStyle(self.GetWindowStyle() & ~wx.STAY_ON_TOP)
             self.status_bar.SetStatusText("窗口未置顶", 1)
 
-
-    def on_open_dir( self, event ):
+    def on_open_dir( self, event):
         dir_path = self.dir_input.GetValue()
         if dir_path and os.path.exists(dir_path):
             try:
-                subprocess.Popen(f'explorer "{self.dir_input.GetValue()}"')
+                # 获取 Shell 窗口集
+                shell = win32com.client.Dispatch("Shell.Application")
+                windows = shell.Windows()
+                
+                # 尝试找到已经打开的资源管理器窗口
+                explorer_window = None
+                for i in range(windows.Count):
+                    window = windows.Item(i)
+                    # 检查是否是文件资源管理器 (explorer.exe)
+                    if "explorer.exe" in window.FullName.lower():
+                        explorer_window = window
+                        break
+                
+                if explorer_window:
+                    # 如果找到了窗口，在该窗口内导航到新路径
+                    explorer_window.Navigate(dir_path)
+                    self.status_bar.SetStatusText(f"导航到新路径: {dir_path}")
+                else:
+                    # 如果没找到，则打开一个新窗口
+                    os.startfile(dir_path)
+                    self.status_bar.SetStatusText(f"已打开路径：{dir_path}")
+
+                # 打开目录后自动执行重置
+                self.on_reset(None)
+
             except Exception as e:
-                wx.MessageBox(f"无法打开目录：{str(e)}", "错误", wx.OK | wx.ICON_ERROR)
+                self.status_bar.SetStatusText(f"无法打开目录：{str(e)}")
+                wx.MessageBox(f"无法打开路径：{str(e)}", "错误", wx.OK | wx.ICON_ERROR)
+
         else:
             self.status_bar.SetStatusText("警告：请先确认保存目录是否有效！")
 
@@ -187,6 +212,11 @@ class SubtitleDownloaderFrame(my_mainform.mainFrame):
         self.search_content = name
         # 在新线程中执行查询，避免UI卡顿
         threading.Thread(target=self._search_thread, args=(name,)).start()
+        
+        search_in_everything = f'Everything.exe -s "{name}"'
+        try:
+            subprocess.run(search_in_everything, shell=True)
+        except: pass
 
     def _search_thread(self, name):
         """查询字幕的后台线程"""
