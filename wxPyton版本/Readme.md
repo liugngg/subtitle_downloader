@@ -15,11 +15,11 @@
 
 - 生成单文件格式（Nuitka --onefile自动压缩）
   
-  `python -m nuitka --mingw64 --onefile --lto=yes --show-progress --output-dir=dist --remove-output --plugin-enable=tk-inter --windows-console-mode=disable --windows-icon-from-ico=liug.ico subtitle_downloader.py`
+  `python -m nuitka --mingw64 --onefile --lto=yes --show-progress --output-dir=dist --remove-output --include-package=wx --windows-console-mode=disable --windows-icon-from-ico=liug.ico subtitle_downloader.py`
 
 - 生成单文件格式（Nuitka --使用upx 压缩）
   
-  `python -m nuitka --mingw64 --onefile --onefile-no-compression --plugin-enable=upx --lto=yes --show-progress --output-dir=dist --remove-output --plugin-enable=tk-inter --windows-console-mode=disable --windows-icon-from-ico=liug.ico subtitle_downloader.py`
+  `python -m nuitka --mingw64 --onefile --onefile-no-compression --plugin-enable=upx --lto=yes --show-progress --output-dir=dist --remove-output --include-package=wx --windows-console-mode=disable --windows-icon-from-ico=liug.ico subtitle_downloader.py`
 
 ## 3. 作者
 
