@@ -5,6 +5,7 @@ import re
 import threading
 import subprocess
 import requests
+from requests.exceptions import ConnectionError, Timeout, HTTPError
 from urllib.parse import quote
 import ttkbootstrap as ttk
 # 显式引入 tkinter 常量，防止版本兼容性问题
@@ -48,7 +49,7 @@ class SubtitleDownloaderFrame(ttk.Window):
         
         self.is_av_var = ttk.BooleanVar(value=True)
         self.is_4k_var = ttk.BooleanVar(value=False)
-        self.is_crack_var = ttk.BooleanVar(value=False)
+        self.is_translate_var = ttk.BooleanVar(value=False)
         self.is_lada_var = ttk.BooleanVar(value=True)
         self.is_enhance_var = ttk.BooleanVar(value=False)
         self.is_leaked_var = ttk.BooleanVar(value=False)
@@ -63,7 +64,7 @@ class SubtitleDownloaderFrame(ttk.Window):
 
         # ------------------ 2. 初始化界面 ------------------
         self._init_ui()
-        self._setup_listview()
+        self._center_window()
 
     def _init_ui(self):
         """初始化界面布局"""
@@ -72,7 +73,7 @@ class SubtitleDownloaderFrame(ttk.Window):
         main_container.pack(fill=BOTH, expand=YES)
 
         # ------------------ 上部分：文件目录设置 ------------------
-        dir_group = ttk.LabelFrame(main_container, text=" 文件目录设置 ", padding=15)
+        dir_group = ttk.LabelFrame(main_container, text=" 文件目录设置 ")
         dir_group.pack(fill=X, pady=(0, 10))
 
         # 1. 片名输入行
@@ -85,7 +86,7 @@ class SubtitleDownloaderFrame(ttk.Window):
         name_entry.bind('<Return>', lambda e: self.on_search())
         
         ttk.Button(input_frame, text="重置", bootstyle="danger-outline", width=10, command=self.on_reset).pack(side=LEFT, padx=5)
-        ttk.Button(input_frame, text="创建目录", bootstyle="succese", width=10, command=self.on_create_dir).pack(side=LEFT, padx=5)
+        ttk.Button(input_frame, text="创建目录", bootstyle="success", width=10, command=self.on_create_dir).pack(side=LEFT, padx=5)
 
         # 2. 选项复选框行
         check_frame = ttk.Frame(dir_group)
@@ -94,10 +95,10 @@ class SubtitleDownloaderFrame(ttk.Window):
         options = [
             ("番号", self.is_av_var),
             ("4K", self.is_4k_var),
-            ("破解", self.is_crack_var),
             ("LADA", self.is_lada_var),
             ("增强", self.is_enhance_var),
             ("流出", self.is_leaked_var),
+            ("自译", self.is_translate_var),
             ("中字", self.is_cn_var),
         ]
         
@@ -111,14 +112,14 @@ class SubtitleDownloaderFrame(ttk.Window):
         save_frame.pack(fill=X)
         
         ttk.Label(save_frame, text="保存目录:", width=8).pack(side=LEFT)
-        self.dir_entry = ttk.Entry(save_frame, textvariable=self.dir_var, state="readonly", bootstyle="secodnary")
+        self.dir_entry = ttk.Entry(save_frame, textvariable=self.dir_var, state="readonly", bootstyle="secondary")
         self.dir_entry.pack(side=LEFT, fill=X, expand=True, padx=5)
         
         ttk.Button(save_frame, text="浏览...", command=self.on_browse,bootstyle="outline", width=10).pack(side=LEFT, padx=5)
         ttk.Button(save_frame, text="打开目录", bootstyle="primary", command=self.on_open_dir, width=10).pack(side=LEFT, padx=5)
 
         # ------------------ 中部分：字幕查询下载 ------------------
-        search_group = ttk.LabelFrame(main_container, text=" 字幕查询下载 ", padding=15)
+        search_group = ttk.LabelFrame(main_container, text=" 字幕查询下载 ")
         search_group.pack(fill=BOTH, expand=True)
 
         # 控制栏
@@ -130,7 +131,7 @@ class SubtitleDownloaderFrame(ttk.Window):
         spin.pack(side=LEFT, padx=5)
 
         ttk.Button(control_frame, text="查询字幕", bootstyle='warning', command=self.on_search, width=10).pack(side=RIGHT, padx=5)
-        ttk.Button(control_frame, text="批量下载", bootstyle="successs", command=self.on_batch_download, width=10).pack(side=RIGHT, padx=5)
+        ttk.Button(control_frame, text="批量下载", bootstyle="success", command=self.on_batch_download, width=10).pack(side=RIGHT, padx=5)
         ttk.Button(control_frame, text="下载选中", bootstyle="primary-outline", command=self.on_download_selected, width=10).pack(side=RIGHT, padx=5)
         
 
@@ -170,8 +171,15 @@ class SubtitleDownloaderFrame(ttk.Window):
         self.theme_lbl.pack(side=RIGHT, padx=5)
         self.theme_lbl.bind("<Double-Button-1>", self.on_change_theme)
 
-    def _setup_listview(self):
-        pass
+    def _center_window(self):
+        """窗口居中显示"""
+        self.update_idletasks()
+        width = self.winfo_width()
+        height = self.winfo_height()
+        x = (self.winfo_screenwidth() // 2) - (width // 2)
+        y = (self.winfo_screenheight() // 2) - (height // 2)
+        self.geometry(f'{width}x{height}+{x}+{y}')
+
 
     # ================= 业务逻辑部分 =================
 
@@ -224,10 +232,10 @@ class SubtitleDownloaderFrame(ttk.Window):
             extend = ''
             if self.is_4k_var.get(): extend += '4K'
             if self.is_lada_var.get(): extend += 'La'
-            elif self.is_crack_var.get(): extend += 'U'
             if self.is_leaked_var.get(): extend += 'L'
             if self.is_enhance_var.get(): extend += 'E'
-            if self.is_cn_var.get(): extend += 'C'
+            if self.is_translate_var.get(): extend += 'Z'
+            elif self.is_cn_var.get(): extend += 'C'
             new_folder = f"{sn}-{extend} {name_part}" if name_part else f"{sn}-{extend}"
 
         if new_folder:
@@ -321,8 +329,11 @@ class SubtitleDownloaderFrame(ttk.Window):
     def _search_thread(self, name):
         api_url = f"http://api-shoulei-ssl.xunlei.com/oracle/subtitle?name={quote(name)}"
         headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+        # 更新状态栏
+        self.after(0, lambda: self.status_left_var.set(f"开始查询：{name} ..."))
         try:
-            response = requests.get(api_url, headers=headers, timeout=8)
+            # 使用 timeout=(连接超时, 读取超时) 分开设置
+            response = requests.get(api_url, headers=headers, timeout=(3, 6))
             response.raise_for_status()
             data = response.json()
             
@@ -332,8 +343,17 @@ class SubtitleDownloaderFrame(ttk.Window):
                 self.after(0, lambda: self.status_left_var.set(f"查询成功，找到 {len(subtitles)} 条结果。    查询内容：{name}"))
             else:
                 self.after(0, lambda: self.status_left_var.set(f"查询失败: {data.get('result')}。    查询内容：{name}"))
+        except ConnectionError as e:
+            err_msg = str(e)
+            self.after(0, lambda m=err_msg: self.status_left_var.set(f"网络错误: {m}"))
+        except HTTPError as e:
+            code = e.response.status_code
+            self.after(0, lambda c=code: self.status_left_var.set(f"HTTP错误: 状态码 {c}。"))
+        except Timeout: 
+            self.after(0, lambda m=err_msg: self.status_left_var.set(f"超时错误！"))
         except Exception as e:
-            self.after(0, lambda: self.status_left_var.set(f"网络错误: {str(e)}"))
+            err_msg = str(e)
+            self.after(0, lambda m=err_msg: self.status_left_var.set(f"未知错误: {m}"))
 
     def _update_list_ui(self, subtitles):
         self.search_results_data = subtitles

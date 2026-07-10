@@ -13,6 +13,9 @@
 - 生成单文件格式（pyinstaller）
   `pyinstaller -i liug.ico -F -w subtitle_downloader.py --clean -n 字幕查询工具-liug`
 
+- 生成文件夹格式（pyinstaller）
+  `uv run python -m PyInstaller -i liug.ico --onedir -w subtitle_downloader.py --clean -n "字幕查询工具-liug"`
+
 - 生成单文件格式（Nuitka --onefile自动压缩）
   
   `python -m nuitka --mingw64 --onefile --lto=yes --show-progress --output-dir=dist --remove-output --plugin-enable=tk-inter --windows-console-mode=disable --windows-icon-from-ico=liug.ico subtitle_downloader.py`
